@@ -37,7 +37,7 @@ export default function JobsScreen() {
   const [jobs, setJobs] = useState<JobListItem[]>([]);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [unread, setUnread] = useState(0);
-  const [profilePercent, setProfilePercent] = useState(100);
+  const [profilePercent, setProfilePercent] = useState(0);
   const [profileMissing, setProfileMissing] = useState<string[]>([]);
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all");

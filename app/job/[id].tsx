@@ -1,10 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
+import { appAlert } from "@/components/ui/AppAlert";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -86,7 +86,7 @@ export default function JobDetailScreen() {
         if (match) setMatchPercent(match.percent);
       }
     } catch (e) {
-      Alert.alert("Error", getApiErrorMessage(e));
+      appAlert("Error", getApiErrorMessage(e));
     } finally {
       setLoading(false);
     }
@@ -102,21 +102,41 @@ export default function JobDetailScreen() {
     try {
       const { canApply } = await fetchSeekerProfile();
       if (!canApply.allowed) {
-        router.push(`/complete-profile?returnTo=/job/${id}`);
+        appAlert(
+          "Complete your profile",
+          `Your profile is ${canApply.percent}% complete. Finish the required fields to apply.`,
+          [
+            { text: "Later", style: "cancel" },
+            {
+              text: "Complete now",
+              onPress: () => router.push(`/complete-profile?returnTo=/job/${id}`),
+            },
+          ]
+        );
         return;
       }
       await applyToJob(id, coverLetter);
       setApplied(true);
       setStatus("applied");
-      Alert.alert("Applied!", "Your application was submitted successfully.");
+      appAlert("Applied!", "Your application was submitted successfully.");
       void load();
     } catch (e) {
       const err = e as { response?: { data?: { profileIncomplete?: boolean } } };
       if (err.response?.data?.profileIncomplete) {
-        router.push(`/complete-profile?returnTo=/job/${id}`);
+        appAlert(
+          "Complete your profile",
+          "Finish your profile before applying to this job.",
+          [
+            { text: "Later", style: "cancel" },
+            {
+              text: "Complete now",
+              onPress: () => router.push(`/complete-profile?returnTo=/job/${id}`),
+            },
+          ]
+        );
         return;
       }
-      Alert.alert("Could not apply", getApiErrorMessage(e));
+      appAlert("Could not apply", getApiErrorMessage(e));
     } finally {
       setApplying(false);
     }
@@ -124,7 +144,7 @@ export default function JobDetailScreen() {
 
   async function onWithdraw() {
     if (!applicationId) return;
-    Alert.alert("Withdraw application", "Are you sure you want to withdraw?", [
+    appAlert("Withdraw application", "Are you sure you want to withdraw?", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Withdraw",
@@ -136,9 +156,9 @@ export default function JobDetailScreen() {
               setApplied(false);
               setStatus(null);
               setApplicationId(null);
-              Alert.alert("Withdrawn", "Application withdrawn.");
+              appAlert("Withdrawn", "Application withdrawn.");
             })
-            .catch((e) => Alert.alert("Error", getApiErrorMessage(e)))
+            .catch((e) => appAlert("Error", getApiErrorMessage(e)))
             .finally(() => setWithdrawing(false));
         },
       },
@@ -157,7 +177,7 @@ export default function JobDetailScreen() {
         setSaved(true);
       }
     } catch (e) {
-      Alert.alert("Error", getApiErrorMessage(e));
+      appAlert("Error", getApiErrorMessage(e));
     } finally {
       setSaving(false);
     }

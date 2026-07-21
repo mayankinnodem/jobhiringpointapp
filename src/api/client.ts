@@ -4,10 +4,18 @@ import * as SecureStore from "expo-secure-store";
 
 const TOKEN_KEY = "jobportal_token";
 
-const baseURL =
+export const apiBaseUrl =
   process.env.EXPO_PUBLIC_API_URL ??
   (Constants.expoConfig?.extra as { apiUrl?: string } | undefined)?.apiUrl ??
   "http://localhost:3000";
+
+const baseURL = apiBaseUrl;
+
+let onUnauthorized: (() => void) | null = null;
+
+export function registerUnauthorizedHandler(handler: () => void) {
+  onUnauthorized = handler;
+}
 
 export const api = axios.create({
   baseURL,
@@ -39,6 +47,17 @@ api.interceptors.request.use(async (config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (res) => res,
+  async (err) => {
+    if (axios.isAxiosError(err) && err.response?.status === 401) {
+      await setToken(null);
+      onUnauthorized?.();
+    }
+    return Promise.reject(err);
+  }
+);
 
 export function getApiErrorMessage(err: unknown): string {
   if (axios.isAxiosError(err)) {

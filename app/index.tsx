@@ -8,5 +8,9 @@ export default function Index() {
     return <Redirect href="/(auth)/login" />;
   }
 
+  if (user.role === "recruiter") {
+    return <Redirect href="/(tabs)/applications" />;
+  }
+
   return <Redirect href="/(tabs)" />;
 }

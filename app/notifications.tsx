@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -19,9 +19,12 @@ import {
 import { getApiErrorMessage } from "@/api/client";
 import { EmptyState } from "@/components/EmptyState";
 import { Screen } from "@/components/ui/Screen";
+import { notificationRoute } from "@/lib/notification-links";
+import { useAuthStore } from "@/store/authStore";
 import { colors, radius, shadow, spacing } from "@/theme";
 
 export default function NotificationsScreen() {
+  const user = useAuthStore((s) => s.user);
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -30,12 +33,7 @@ export default function NotificationsScreen() {
   const load = useCallback(async () => {
     try {
       setError(null);
-      const list = await fetchNotifications();
-      setItems(list);
-      if (list.some((n) => !n.read)) {
-        await markNotificationsRead();
-        setItems((prev) => prev.map((n) => ({ ...n, read: true })));
-      }
+      setItems(await fetchNotifications());
     } catch (e) {
       setError(getApiErrorMessage(e));
     } finally {
@@ -48,18 +46,34 @@ export default function NotificationsScreen() {
     void load();
   }, [load]);
 
+  async function onOpen(item: NotificationItem) {
+    if (!item.read) {
+      try {
+        await markNotificationsRead([item._id]);
+        setItems((prev) =>
+          prev.map((n) => (n._id === item._id ? { ...n, read: true } : n))
+        );
+      } catch {
+        /* continue navigation */
+      }
+    }
+
+    const route =
+      user?.role && item.type
+        ? notificationRoute(item.type, item.meta, user.role)
+        : null;
+
+    if (route) {
+      router.push(route as "/chat");
+      return;
+    }
+    if (item.meta?.jobId) {
+      router.push(`/job/${item.meta.jobId}`);
+    }
+  }
+
   return (
-    <>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: "Notifications",
-          headerTintColor: colors.brand,
-          headerStyle: { backgroundColor: colors.white },
-          headerShadowVisible: false,
-        }}
-      />
-      <Screen edges={["left", "right", "bottom"]}>
+    <Screen edges={["left", "right", "bottom"]}>
         {loading && !refreshing ? (
           <View style={styles.center}>
             <ActivityIndicator size="large" color={colors.brandLight} />
@@ -111,7 +125,7 @@ export default function NotificationsScreen() {
             renderItem={({ item }) => (
               <Pressable
                 style={[styles.card, !item.read && styles.cardUnread]}
-                onPress={() => openNotification(item)}
+                onPress={() => void onOpen(item)}
               >
                 <View style={[styles.iconWrap, !item.read && styles.iconUnread]}>
                   <Ionicons
@@ -129,8 +143,7 @@ export default function NotificationsScreen() {
             )}
           />
         )}
-      </Screen>
-    </>
+    </Screen>
   );
 }
 
@@ -140,18 +153,14 @@ function iconForType(type?: string): keyof typeof Ionicons.glyphMap {
       return "person-add-outline";
     case "application_status":
       return "document-text-outline";
+    case "chat_message":
+      return "chatbubbles-outline";
     case "payment":
       return "card-outline";
     case "system":
       return "information-circle-outline";
     default:
       return "notifications-outline";
-  }
-}
-
-function openNotification(item: NotificationItem) {
-  if (item.meta?.jobId) {
-    router.push(`/job/${item.meta.jobId}`);
   }
 }
 

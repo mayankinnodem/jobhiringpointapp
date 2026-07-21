@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
+import { MIN_APPLY_PERCENT } from "@/constants/profile";
 import { colors, radius, spacing } from "@/theme";
 
 export function ProfileCompleteBanner({
@@ -10,7 +11,7 @@ export function ProfileCompleteBanner({
   percent: number;
   missing: string[];
 }) {
-  if (percent >= 60) return null;
+  if (percent >= MIN_APPLY_PERCENT) return null;
 
   return (
     <Pressable style={styles.wrap} onPress={() => router.push("/complete-profile")}>

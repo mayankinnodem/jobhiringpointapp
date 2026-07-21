@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
+import { appAlert } from "@/components/ui/AppAlert";
 import { router, Stack } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -40,7 +40,7 @@ export default function JobAlertsScreen() {
     try {
       setAlerts(await fetchJobAlerts());
     } catch (e) {
-      Alert.alert("Error", getApiErrorMessage(e));
+      appAlert("Error", getApiErrorMessage(e));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -53,7 +53,7 @@ export default function JobAlertsScreen() {
 
   async function onCreate() {
     if (!name.trim()) {
-      Alert.alert("Name required", "Give your alert a name.");
+      appAlert("Name required", "Give your alert a name.");
       return;
     }
     setSaving(true);
@@ -69,7 +69,7 @@ export default function JobAlertsScreen() {
       setLocation("");
       setShowForm(false);
     } catch (e) {
-      Alert.alert("Error", getApiErrorMessage(e));
+      appAlert("Error", getApiErrorMessage(e));
     } finally {
       setSaving(false);
     }
@@ -80,12 +80,12 @@ export default function JobAlertsScreen() {
       const updated = await updateJobAlert(alert._id, { isActive: !alert.isActive });
       setAlerts((prev) => prev.map((a) => (a._id === alert._id ? updated : a)));
     } catch (e) {
-      Alert.alert("Error", getApiErrorMessage(e));
+      appAlert("Error", getApiErrorMessage(e));
     }
   }
 
   function confirmDelete(alert: JobAlertItem) {
-    Alert.alert("Delete alert", `Remove "${alert.name}"?`, [
+    appAlert("Delete alert", `Remove "${alert.name}"?`, [
       { text: "Cancel", style: "cancel" },
       {
         text: "Delete",

@@ -10,6 +10,9 @@ type ApiNotification = {
   meta?: {
     jobId?: string;
     applicationId?: string;
+    peerUserId?: string;
+    fromUserId?: string;
+    jobTitle?: string;
     status?: string;
   };
 };

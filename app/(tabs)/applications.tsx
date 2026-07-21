@@ -1,10 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
+import { appAlert } from "@/components/ui/AppAlert";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -24,6 +24,13 @@ import { Screen } from "@/components/ui/Screen";
 import { useAuthStore } from "@/store/authStore";
 import { colors, radius, shadow, spacing } from "@/theme";
 import type { ApplicationItem, JobListItem } from "@/types";
+
+function recruiterIdFromJob(job?: JobListItem): string | null {
+  const r = job?.recruiterId;
+  if (!r) return null;
+  if (typeof r === "string") return r;
+  return r._id;
+}
 
 const STATUS_COLORS: Record<string, string> = {
   applied: colors.brand,
@@ -76,7 +83,7 @@ export default function ApplicationsScreen() {
 
   function confirmWithdraw(app: ApplicationItem) {
     if (app.status === "hired" || app.status === "withdrawn") return;
-    Alert.alert("Withdraw", "Withdraw this application?", [
+    appAlert("Withdraw", "Withdraw this application?", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Withdraw",
@@ -84,7 +91,7 @@ export default function ApplicationsScreen() {
         onPress: () => {
           void withdrawApplication(app._id)
             .then(() => setApplications((prev) => prev.filter((a) => a._id !== app._id)))
-            .catch((e) => Alert.alert("Error", getApiErrorMessage(e)));
+            .catch((e) => appAlert("Error", getApiErrorMessage(e)));
         },
       },
     ]);
@@ -134,9 +141,9 @@ export default function ApplicationsScreen() {
           ListEmptyComponent={
             <EmptyState
               title="No jobs posted"
-              subtitle="Create your company profile and post your first job."
-              actionLabel="Post a job"
-              onAction={() => router.push("/recruiter/post-job")}
+              subtitle="Create your company profile, then post your first job."
+              actionLabel="Company profile"
+              onAction={() => router.push("/recruiter/company")}
             />
           }
           renderItem={({ item }) => (
@@ -188,6 +195,7 @@ export default function ApplicationsScreen() {
           const status = item.status.replace(/_/g, " ");
           const color = STATUS_COLORS[item.status] ?? colors.brand;
           const canWithdraw = item.status !== "hired" && item.status !== "withdrawn";
+          const recruiterId = recruiterIdFromJob(item.jobId);
           return (
             <View style={styles.appCard}>
               <View style={styles.appTop}>
@@ -202,6 +210,18 @@ export default function ApplicationsScreen() {
                 {item.jobId?._id ? (
                   <Text style={styles.viewLink} onPress={() => router.push(`/job/${item.jobId!._id}`)}>
                     View job →
+                  </Text>
+                ) : null}
+                {item.jobId?._id && recruiterId ? (
+                  <Text
+                    style={styles.messageLink}
+                    onPress={() =>
+                      router.push(
+                        `/chat?jobId=${item.jobId!._id}&peerUserId=${recruiterId}&peerName=${encodeURIComponent("Recruiter")}`
+                      )
+                    }
+                  >
+                    Message
                   </Text>
                 ) : null}
                 {canWithdraw ? (
@@ -259,5 +279,6 @@ const styles = StyleSheet.create({
   appMeta: { fontSize: 13, color: colors.slate400, marginTop: 4 },
   appLinks: { flexDirection: "row", gap: 20, marginTop: 10 },
   viewLink: { fontSize: 13, fontWeight: "700", color: colors.brand },
+  messageLink: { fontSize: 13, fontWeight: "700", color: colors.brandLight },
   withdrawLink: { fontSize: 13, fontWeight: "700", color: colors.red },
 });

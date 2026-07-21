@@ -12,7 +12,10 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "plugins": ["expo-router", "expo-secure-store"],
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.jobhiringpoint.app"
@@ -25,13 +28,19 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "package": "com.jobhiringpoint.app",
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "apiUrl": "http://localhost:3000"
-    }
+      "apiUrl": "https://jobhiringpoint.com",
+      "router": {},
+      "eas": {
+        "projectId": "6c45c185-20e6-41e5-bb05-927d0e191d43"
+      }
+    },
+    "owner": "mayankwebdeveloper"
   }
 }

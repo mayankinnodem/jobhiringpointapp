@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { fetchSavedJobs, unsaveJob } from "@/api/extras";
 import { getApiErrorMessage } from "@/api/client";
+import { appAlert } from "@/components/ui/AppAlert";
 import { EmptyState } from "@/components/EmptyState";
 import { JobCard } from "@/components/JobCard";
 import { Screen } from "@/components/ui/Screen";
@@ -42,8 +43,14 @@ export default function SavedScreen() {
   }, [load]);
 
   async function remove(jobId: string) {
-    await unsaveJob(jobId);
-    setJobs((prev) => prev.filter((j) => j._id !== jobId));
+    const prev = jobs;
+    setJobs((j) => j.filter((x) => x._id !== jobId));
+    try {
+      await unsaveJob(jobId);
+    } catch (e) {
+      setJobs(prev);
+      appAlert("Could not remove", getApiErrorMessage(e));
+    }
   }
 
   if (loading) {

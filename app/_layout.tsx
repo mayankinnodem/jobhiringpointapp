@@ -1,8 +1,10 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
+import { SessionGuard } from "@/components/SessionGuard";
 import { useAuthStore } from "@/store/authStore";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { AppAlertProvider } from "@/components/ui/AppAlert";
 import { colors } from "@/theme";
 
 const headerOptions = {
@@ -30,7 +32,8 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <AppAlertProvider>
+      <SessionGuard />
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
@@ -38,7 +41,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="job/[id]" options={{ ...headerOptions, title: "Job details" }} />
         <Stack.Screen name="notifications" options={{ ...headerOptions, title: "Notifications" }} />
-        <Stack.Screen name="complete-profile" options={{ ...headerOptions, title: "Complete profile" }} />
+        <Stack.Screen name="complete-profile" options={{ ...headerOptions, title: "Edit profile" }} />
         <Stack.Screen name="recommended" options={{ ...headerOptions, title: "Recommended" }} />
         <Stack.Screen name="job-alerts" options={{ ...headerOptions, title: "Job alerts" }} />
         <Stack.Screen name="companies" options={{ ...headerOptions, title: "Companies" }} />
@@ -48,6 +51,6 @@ export default function RootLayout() {
         <Stack.Screen name="recruiter/post-job" options={{ ...headerOptions, title: "Post job" }} />
         <Stack.Screen name="recruiter/applicants/[jobId]" options={{ ...headerOptions, title: "Applicants" }} />
       </Stack>
-    </>
+    </AppAlertProvider>
   );
 }

@@ -1,8 +1,8 @@
 import { router, Stack, useLocalSearchParams } from "expo-router";
+import { appAlert } from "@/components/ui/AppAlert";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import {
   createRecruiterJob,
+  fetchRecruiterCompany,
   fetchRecruiterJob,
   updateRecruiterJob,
 } from "@/api/recruiter";
@@ -45,11 +46,16 @@ export default function PostJobScreen() {
   const [jobType, setJobType] = useState<string>("full_time");
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [categories, setCategories] = useState<{ _id: string; name: string }[]>([]);
+  const [hasCompany, setHasCompany] = useState(true);
 
   const load = useCallback(async () => {
     try {
-      const cats = await fetchCategories();
+      const [cats, company] = await Promise.all([
+        fetchCategories(),
+        fetchRecruiterCompany().catch(() => null),
+      ]);
       setCategories(cats);
+      setHasCompany(!!company?.name?.trim());
       if (id) {
         const job = await fetchRecruiterJob(id);
         setTitle(job.title);
@@ -63,7 +69,7 @@ export default function PostJobScreen() {
         setCategoryId(typeof job.categoryId === "string" ? job.categoryId : null);
       }
     } catch (e) {
-      Alert.alert("Error", getApiErrorMessage(e));
+      appAlert("Error", getApiErrorMessage(e));
     } finally {
       setLoading(false);
     }
@@ -74,8 +80,15 @@ export default function PostJobScreen() {
   }, [load]);
 
   async function onSubmit(asDraft: boolean) {
+    if (!hasCompany) {
+      appAlert("Company profile required", "Create your company profile before posting jobs.", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Create company", onPress: () => router.push("/recruiter/company") },
+      ]);
+      return;
+    }
     if (!title.trim() || !description.trim() || !location.trim()) {
-      Alert.alert("Required fields", "Title, description and location are required.");
+      appAlert("Required fields", "Title, description and location are required.");
       return;
     }
     const min = Number(salaryMin) || 0;
@@ -96,15 +109,15 @@ export default function PostJobScreen() {
       };
       if (isEdit && id) {
         await updateRecruiterJob(id, payload);
-        Alert.alert("Updated", "Job saved successfully.", [{ text: "OK", onPress: () => router.back() }]);
+        appAlert("Updated", "Job saved successfully.", [{ text: "OK", onPress: () => router.back() }]);
       } else {
         await createRecruiterJob(payload);
-        Alert.alert("Submitted", asDraft ? "Draft saved." : "Job submitted for review.", [
+        appAlert("Submitted", asDraft ? "Draft saved." : "Job submitted for review.", [
           { text: "OK", onPress: () => router.back() },
         ]);
       }
     } catch (e) {
-      Alert.alert("Error", getApiErrorMessage(e));
+      appAlert("Error", getApiErrorMessage(e));
     } finally {
       setSaving(false);
     }
@@ -122,6 +135,13 @@ export default function PostJobScreen() {
     <>
       <Stack.Screen options={{ title: isEdit ? "Edit job" : "Post a job", headerTintColor: colors.brand }} />
       <Screen edges={["left", "right", "bottom"]}>
+        {!hasCompany ? (
+          <Pressable style={styles.companyBanner} onPress={() => router.push("/recruiter/company")}>
+            <Text style={styles.companyBannerText}>
+              Create your company profile before posting jobs →
+            </Text>
+          </Pressable>
+        ) : null}
         <ScrollView contentContainerStyle={styles.scroll}>
           <AppInput label="Job title *" icon="briefcase-outline" value={title} onChangeText={setTitle} placeholder="e.g. Software Engineer" />
           <AppInput label="Location *" icon="location-outline" value={location} onChangeText={setLocation} placeholder="City, state" />
@@ -176,6 +196,16 @@ export default function PostJobScreen() {
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
+  companyBanner: {
+    margin: spacing.md,
+    marginBottom: 0,
+    backgroundColor: "#fff8ee",
+    borderRadius: radius.md,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#ffddb3",
+  },
+  companyBannerText: { fontSize: 13, fontWeight: "700", color: colors.brand },
   scroll: { padding: spacing.md, paddingBottom: spacing.xl },
   label: { fontSize: 13, fontWeight: "600", color: colors.brand, marginBottom: 8, marginTop: 4 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: spacing.md },

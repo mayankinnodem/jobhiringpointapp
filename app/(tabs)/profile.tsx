@@ -1,10 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
+import { appAlert } from "@/components/ui/AppAlert";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { fetchSeekerProfile } from "@/api/profile";
 import { AppButton } from "@/components/ui/AppButton";
+import { SwitchRoleCard } from "@/components/SwitchRoleCard";
 import { Screen } from "@/components/ui/Screen";
 import { useAuthStore } from "@/store/authStore";
 import { colors, radius, shadow, spacing } from "@/theme";
@@ -33,7 +35,7 @@ export default function ProfileScreen() {
   }
 
   function confirmLogout() {
-    Alert.alert("Sign out", "Are you sure?", [
+    appAlert("Sign out", "Are you sure?", [
       { text: "Cancel", style: "cancel" },
       { text: "Sign out", style: "destructive", onPress: () => void onLogout() },
     ]);
@@ -76,6 +78,8 @@ export default function ProfileScreen() {
             </Text>
           ) : null}
         </View>
+
+        <SwitchRoleCard />
 
         <View style={styles.menu}>
           <Text style={styles.menuHeading}>Quick actions</Text>

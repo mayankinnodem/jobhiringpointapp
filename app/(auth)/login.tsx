@@ -1,19 +1,60 @@
 import { Link, router } from "expo-router";
+import { appAlert } from "@/components/ui/AppAlert";
 import { useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { loginWithEmail } from "@/api/auth";
+import { getApiErrorMessage } from "@/api/client";
 import { AuthShell } from "@/components/AuthShell";
-import { PhoneOtpFlow } from "@/components/PhoneOtpFlow";
-import { RoleCard } from "@/components/ui/AppInput";
-import { colors, spacing } from "@/theme";
+import { OtpAuthFlow } from "@/components/OtpAuthFlow";
+import { AppInput, RoleCard } from "@/components/ui/AppInput";
+import { resolvePostAuthPath } from "@/lib/auth-redirect";
+import { colors, radius, spacing } from "@/theme";
+import type { PublicUser } from "@/types";
 
 export default function LoginScreen() {
   const [role, setRole] = useState<"job_seeker" | "recruiter">("job_seeker");
+  const [showEmailLogin, setShowEmailLogin] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [emailBusy, setEmailBusy] = useState(false);
+
+  async function onEmailLogin() {
+    if (!email.trim() || !password) {
+      appAlert("Missing fields", "Enter email and password.");
+      return;
+    }
+    setEmailBusy(true);
+    try {
+      const user = await loginWithEmail(email, password);
+      if (user.role !== role && user.role !== "admin") {
+        appAlert(
+          "Signed in",
+          `This account is registered as ${user.role === "recruiter" ? "Recruiter" : "Job Seeker"}.`
+        );
+      }
+      router.replace(resolvePostAuthPath(user.role, "login") as "/(tabs)");
+    } catch (e) {
+      appAlert("Could not sign in", getApiErrorMessage(e));
+    } finally {
+      setEmailBusy(false);
+    }
+  }
 
   return (
     <AuthShell
       title="Welcome back"
-      subtitle="Sign in with your mobile number — OTP sent via SMS"
+      subtitle={
+        showEmailLogin
+          ? "Sign in with email and password"
+          : "Sign in with email or mobile OTP"
+      }
     >
       <Text style={styles.sectionLabel}>I am a</Text>
       <View style={styles.roleRow}>
@@ -33,27 +74,75 @@ export default function LoginScreen() {
         />
       </View>
 
-      <PhoneOtpFlow
+      <OtpAuthFlow
         purpose="login"
         role={role}
         onRoleMismatch={(actual) => {
-          Alert.alert(
-            "Wrong role",
-            `This number is registered as ${actual === "recruiter" ? "Recruiter" : "Job Seeker"}`
-          );
           setRole(actual as "job_seeker" | "recruiter");
         }}
-        onSuccess={() => router.replace("/(tabs)")}
+        onSuccess={(user: PublicUser) => {
+          if (user.role !== role) {
+            appAlert(
+              "Signed in",
+              `This account is registered as ${user.role === "recruiter" ? "Recruiter" : "Job Seeker"}. You can switch account type in Profile.`
+            );
+          }
+          router.replace(resolvePostAuthPath(user.role, "login") as "/(tabs)");
+        }}
       />
 
-      <Text style={styles.hint}>
-        New user? Register first. Dev login: 9999999999 + OTP 999999 (run npm run seed in web).
-      </Text>
+      <Pressable
+        style={styles.toggleEmail}
+        onPress={() => setShowEmailLogin((v) => !v)}
+      >
+        <Text style={styles.toggleEmailText}>
+          {showEmailLogin ? "Use mobile OTP instead" : "Sign in with email instead"}
+        </Text>
+      </Pressable>
+
+      {showEmailLogin ? (
+        <View style={styles.emailBox}>
+          <AppInput
+            label="Email"
+            icon="mail-outline"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="you@example.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <AppInput
+            label="Password"
+            icon="lock-closed-outline"
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Password"
+            secureTextEntry
+          />
+          <Pressable
+            style={[styles.emailBtn, emailBusy && styles.emailBtnOff]}
+            disabled={emailBusy}
+            onPress={() => void onEmailLogin()}
+          >
+            {emailBusy ? (
+              <ActivityIndicator color={colors.white} />
+            ) : (
+              <Text style={styles.emailBtnText}>Sign in with email</Text>
+            )}
+          </Pressable>
+        </View>
+      ) : null}
+
+      {__DEV__ ? (
+        <Text style={styles.hint}>
+          Dev login: 9999999999 + OTP 999999 (run npm run seed in web).
+        </Text>
+      ) : null}
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>Don&apos;t have an account? </Text>
         <Link href="/(auth)/register" asChild>
-          <Text style={styles.link}>Register with mobile</Text>
+          <Text style={styles.link}>Create free account</Text>
         </Link>
       </View>
     </AuthShell>
@@ -70,6 +159,22 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   roleRow: { flexDirection: "row", gap: 10, marginBottom: spacing.md },
+  toggleEmail: { marginTop: spacing.md, alignItems: "center" },
+  toggleEmailText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: colors.brandLight,
+  },
+  emailBox: { marginTop: spacing.md, gap: spacing.sm },
+  emailBtn: {
+    marginTop: spacing.sm,
+    backgroundColor: colors.brandLight,
+    borderRadius: radius.lg,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  emailBtnOff: { opacity: 0.6 },
+  emailBtnText: { color: colors.white, fontWeight: "800", fontSize: 15 },
   hint: {
     textAlign: "center",
     fontSize: 12,

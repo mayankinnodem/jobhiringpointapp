@@ -1,8 +1,8 @@
 import { router, Stack } from "expo-router";
+import { appAlert } from "@/components/ui/AppAlert";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -35,7 +35,7 @@ export default function RecruiterCompanyScreen() {
         setCompanySize(company.companySize ?? "");
       }
     } catch (e) {
-      Alert.alert("Error", getApiErrorMessage(e));
+      appAlert("Error", getApiErrorMessage(e));
     } finally {
       setLoading(false);
     }
@@ -47,7 +47,7 @@ export default function RecruiterCompanyScreen() {
 
   async function onSave() {
     if (!name.trim()) {
-      Alert.alert("Required", "Company name is required.");
+      appAlert("Required", "Company name is required.");
       return;
     }
     setSaving(true);
@@ -59,11 +59,11 @@ export default function RecruiterCompanyScreen() {
         industry: industry.trim(),
         companySize: companySize.trim(),
       });
-      Alert.alert("Saved", "Company profile updated.", [
-        { text: "OK", onPress: () => router.back() },
+      appAlert("Saved", "Company profile updated.", [
+        { text: "OK", onPress: () => router.replace("/(tabs)") },
       ]);
     } catch (e) {
-      Alert.alert("Error", getApiErrorMessage(e));
+      appAlert("Error", getApiErrorMessage(e));
     } finally {
       setSaving(false);
     }

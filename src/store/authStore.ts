@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import * as authApi from "@/api/auth";
-import { getToken } from "@/api/client";
+import { getToken, setToken } from "@/api/client";
 import type { PublicUser, UserRole } from "@/types";
 
 type AuthState = {
@@ -8,12 +8,13 @@ type AuthState = {
   loading: boolean;
   bootstrapped: boolean;
   bootstrap: () => Promise<void>;
+  setUser: (user: PublicUser | null) => void;
   verifyOtpAuth: (payload: {
-    phone: string;
+    identifier: string;
     otp: string;
     purpose: "register" | "login";
     expectedRole?: UserRole;
-  }) => Promise<PublicUser>;
+  }) => Promise<{ user: PublicUser; roleCorrected: boolean }>;
   logout: () => Promise<void>;
 };
 
@@ -21,6 +22,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   loading: false,
   bootstrapped: false,
+
+  setUser: (user) => set({ user }),
 
   async bootstrap() {
     set({ loading: true });
@@ -33,6 +36,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       const user = await authApi.fetchMe();
       set({ user, bootstrapped: true });
     } catch {
+      await setToken(null);
       set({ user: null, bootstrapped: true });
     } finally {
       set({ loading: false });
@@ -42,9 +46,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   async verifyOtpAuth(payload) {
     set({ loading: true });
     try {
-      const user = await authApi.verifyOtp(payload);
-      set({ user });
-      return user;
+      const result = await authApi.verifyOtp(payload);
+      set({ user: result.user });
+      return result;
     } finally {
       set({ loading: false });
     }

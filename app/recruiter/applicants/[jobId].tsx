@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
+import { appAlert } from "@/components/ui/AppAlert";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -38,7 +38,7 @@ export default function ApplicantsScreen() {
     try {
       setApplicants(await fetchJobApplicants(jobId));
     } catch (e) {
-      Alert.alert("Error", getApiErrorMessage(e));
+      appAlert("Error", getApiErrorMessage(e));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -60,11 +60,11 @@ export default function ApplicantsScreen() {
                 prev.map((a) => (a._id === app._id ? { ...a, status: updated.status } : a))
               );
             })
-            .catch((e) => Alert.alert("Error", getApiErrorMessage(e)));
+            .catch((e) => appAlert("Error", getApiErrorMessage(e)));
         },
       }));
     buttons.push({ text: "Cancel", style: "cancel" });
-    Alert.alert("Update status", `${app.seekerId?.name ?? "Applicant"}`, buttons);
+    appAlert("Update status", `${app.seekerId?.name ?? "Applicant"}`, buttons);
   }
 
   if (loading) {

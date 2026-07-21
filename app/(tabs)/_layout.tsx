@@ -1,11 +1,29 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
-import { Platform, StyleSheet, View, type ColorValue } from "react-native";
+import { useEffect } from "react";
+import { Platform, StyleSheet, Text, View, type ColorValue } from "react-native";
+import { appAlert } from "@/components/ui/AppAlert";
+import { useChatUnreadBadge } from "@/hooks/useChatUnreadBadge";
 import { useAuthStore } from "@/store/authStore";
 import { colors, radius } from "@/theme";
 
 export default function TabsLayout() {
   const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+  const isSeeker = user?.role === "job_seeker";
+  const isRecruiter = user?.role === "recruiter";
+  const showMessages = isSeeker || isRecruiter;
+  const { count: chatUnread } = useChatUnreadBadge(showMessages);
+
+  useEffect(() => {
+    if (user?.role === "admin") {
+      appAlert(
+        "Web dashboard only",
+        "Admin accounts are managed on the web. Please sign in at jobhiringpoint.com"
+      );
+      void logout();
+    }
+  }, [user?.role, logout]);
 
   if (!user) {
     return <Redirect href="/(auth)/login" />;
@@ -14,9 +32,6 @@ export default function TabsLayout() {
   if (user.role === "admin") {
     return <Redirect href="/(auth)/login" />;
   }
-
-  const isSeeker = user.role === "job_seeker";
-  const isRecruiter = user.role === "recruiter";
 
   return (
     <Tabs
@@ -67,6 +82,21 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="messages"
+        options={{
+          title: "Messages",
+          href: showMessages ? "/messages" : null,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIconWithBadge
+              name={focused ? "chatbubbles" : "chatbubbles-outline"}
+              color={color}
+              focused={focused}
+              badge={chatUnread}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
@@ -95,6 +125,29 @@ function TabIcon({
   );
 }
 
+function TabIconWithBadge({
+  name,
+  color,
+  focused,
+  badge,
+}: {
+  name: keyof typeof Ionicons.glyphMap;
+  color: ColorValue;
+  focused: boolean;
+  badge: number;
+}) {
+  return (
+    <View>
+      <TabIcon name={name} color={color} focused={focused} />
+      {badge > 0 ? (
+        <View style={styles.tabBadge}>
+          <Text style={styles.tabBadgeText}>{badge > 9 ? "9+" : badge}</Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: colors.white,
@@ -118,4 +171,17 @@ const styles = StyleSheet.create({
   iconWrapOn: {
     backgroundColor: "#fff4e6",
   },
+  tabBadge: {
+    position: "absolute",
+    top: -2,
+    right: -4,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colors.red,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+  },
+  tabBadgeText: { fontSize: 9, fontWeight: "800", color: colors.white },
 });
