@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -14,6 +13,7 @@ import {
 import { fetchChatThreads, type ChatThread } from "@/api/chat";
 import { getApiErrorMessage } from "@/api/client";
 import { EmptyState } from "@/components/EmptyState";
+import { TabGradientHeader } from "@/components/TabGradientHeader";
 import { Screen } from "@/components/ui/Screen";
 import { colors, radius, spacing } from "@/theme";
 
@@ -86,11 +86,8 @@ export default function MessagesScreen() {
   }
 
   return (
-    <Screen edges={["top", "left", "right"]}>
-      <LinearGradient colors={[colors.brand, colors.brandDark]} style={styles.header}>
-        <Text style={styles.title}>Messages</Text>
-        <Text style={styles.sub}>Chat with recruiters or candidates</Text>
-      </LinearGradient>
+    <Screen edges={["left", "right", "bottom"]}>
+      <TabGradientHeader title="Messages" subtitle="Chat with recruiters or candidates" />
 
       <FlatList
         data={threads}
@@ -140,11 +137,8 @@ export default function MessagesScreen() {
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  header: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.xl },
-  title: { fontSize: 26, fontWeight: "800", color: colors.white },
-  sub: { marginTop: 4, fontSize: 14, color: "rgba(255,255,255,0.85)" },
-  list: { padding: spacing.md },
-  listEmpty: { flexGrow: 1 },
+  list: { padding: spacing.md, paddingBottom: spacing.xl },
+  listEmpty: { flexGrow: 1, paddingBottom: spacing.xl },
   row: {
     flexDirection: "row",
     alignItems: "flex-start",

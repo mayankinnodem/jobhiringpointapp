@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,7 +14,7 @@ import {
 import { fetchCompanies } from "@/api/seeker";
 import { getApiErrorMessage } from "@/api/client";
 import { EmptyState } from "@/components/EmptyState";
-import { Screen } from "@/components/ui/Screen";
+import { StackPageShell } from "@/components/navigation/StackPageShell";
 import { colors, radius, shadow, spacing } from "@/theme";
 import type { CompanyItem } from "@/types";
 
@@ -42,9 +42,7 @@ export default function CompaniesScreen() {
   }, [load]);
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Companies", headerTintColor: colors.brand }} />
-      <Screen edges={["left", "right", "bottom"]}>
+    <StackPageShell title="Companies">
         <View style={styles.searchBox}>
           <Ionicons name="search" size={20} color={colors.slate400} />
           <TextInput
@@ -85,8 +83,7 @@ export default function CompaniesScreen() {
             )}
           />
         )}
-      </Screen>
-    </>
+    </StackPageShell>
   );
 }
 

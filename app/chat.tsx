@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { appAlert } from "@/components/ui/AppAlert";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -22,7 +22,7 @@ import {
 } from "@/api/chat";
 import { getApiErrorMessage } from "@/api/client";
 import { EmptyState } from "@/components/EmptyState";
-import { Screen } from "@/components/ui/Screen";
+import { StackPageShell } from "@/components/navigation/StackPageShell";
 import {
   createChatSocket,
   joinChatThread,
@@ -161,9 +161,7 @@ export default function ChatScreen() {
   const title = peerName ? decodeURIComponent(peerName) : "Chat";
 
   return (
-    <>
-      <Stack.Screen options={{ title, headerTintColor: colors.brand }} />
-      <Screen edges={["left", "right", "bottom"]}>
+    <StackPageShell title={title}>
         <KeyboardAvoidingView
           style={styles.flex}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -237,8 +235,7 @@ export default function ChatScreen() {
             </View>
           ) : null}
         </KeyboardAvoidingView>
-      </Screen>
-    </>
+    </StackPageShell>
   );
 }
 

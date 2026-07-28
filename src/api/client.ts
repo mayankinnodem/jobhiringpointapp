@@ -52,8 +52,15 @@ api.interceptors.response.use(
   (res) => res,
   async (err) => {
     if (axios.isAxiosError(err) && err.response?.status === 401) {
-      await setToken(null);
-      onUnauthorized?.();
+      const url = err.config?.url ?? "";
+      const isAuthFlow =
+        url.includes("/api/auth/otp/verify") ||
+        url.includes("/api/auth/otp/send") ||
+        url.includes("/api/auth/login");
+      if (!isAuthFlow) {
+        await setToken(null);
+        onUnauthorized?.();
+      }
     }
     return Promise.reject(err);
   }

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,7 +14,7 @@ import { fetchRecommendedJobs } from "@/api/seeker";
 import { getApiErrorMessage } from "@/api/client";
 import { EmptyState } from "@/components/EmptyState";
 import { JobCard } from "@/components/JobCard";
-import { Screen } from "@/components/ui/Screen";
+import { StackPageShell } from "@/components/navigation/StackPageShell";
 import { colors, radius, spacing } from "@/theme";
 import type { JobListItem } from "@/types";
 
@@ -41,9 +41,7 @@ export default function RecommendedScreen() {
   }, [load]);
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Recommended for you", headerTintColor: colors.brand }} />
-      <Screen edges={["left", "right", "bottom"]}>
+    <StackPageShell title="Recommended">
         {loading ? (
           <View style={styles.center}>
             <ActivityIndicator size="large" color={colors.brandLight} />
@@ -76,8 +74,7 @@ export default function RecommendedScreen() {
             )}
           />
         )}
-      </Screen>
-    </>
+    </StackPageShell>
   );
 }
 

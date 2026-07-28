@@ -1,4 +1,7 @@
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BrandLogo } from "@/components/BrandLogo";
 import { colors, radius, shadow, spacing } from "@/theme";
 
@@ -6,11 +9,14 @@ export function AuthShell({
   title,
   subtitle,
   children,
+  showBack,
 }: {
   title: string;
   subtitle: string;
   children: React.ReactNode;
+  showBack?: boolean;
 }) {
+  const insets = useSafeAreaInsets();
   return (
     <View style={styles.root}>
       <KeyboardAvoidingView
@@ -22,7 +28,18 @@ export function AuthShell({
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.header}>
+          {showBack ? (
+            <Pressable
+              style={[styles.backRow, { paddingTop: insets.top + spacing.xs }]}
+              onPress={() => (router.canGoBack() ? router.back() : router.replace("/(auth)/login"))}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+            >
+              <Ionicons name="arrow-back" size={24} color={colors.brand} />
+              <Text style={styles.backText}>Back</Text>
+            </Pressable>
+          ) : null}
+          <View style={[styles.header, showBack && styles.headerWithBack]}>
             <BrandLogo size="lg" />
             <View style={styles.accent} />
             <Text style={styles.title}>{title}</Text>
@@ -42,6 +59,14 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.white },
   flex: { flex: 1 },
   scroll: { flexGrow: 1, paddingBottom: spacing.xl },
+  backRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.xs,
+  },
+  backText: { fontSize: 16, fontWeight: "600", color: colors.brand },
   header: {
     alignItems: "center",
     paddingTop: 56,
@@ -51,6 +76,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.brand100,
   },
+  headerWithBack: { paddingTop: spacing.md },
   accent: {
     width: 48,
     height: 4,

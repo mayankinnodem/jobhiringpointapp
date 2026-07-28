@@ -1,9 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -12,6 +14,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { fetchJobs } from "@/api/jobs";
 import { fetchSeekerProfile } from "@/api/profile";
 import { fetchSavedJobIds, fetchUnreadCount, saveJob, unsaveJob } from "@/api/extras";
@@ -20,10 +23,11 @@ import { EmptyState } from "@/components/EmptyState";
 import { HomeHeader } from "@/components/HomeHeader";
 import { JobCard } from "@/components/JobCard";
 import { ProfileCompleteBanner } from "@/components/ProfileCompleteBanner";
-import { Screen } from "@/components/ui/Screen";
-import { useAuthStore } from "@/store/authStore";
 import { colors, radius, shadow, spacing } from "@/theme";
+import { useAuthStore } from "@/store/authStore";
 import type { JobListItem } from "@/types";
+
+const TAB_BAR_CORE = Platform.OS === "ios" ? 56 : 62;
 
 const FILTERS = [
   { key: "all", label: "All" },
@@ -34,6 +38,9 @@ const FILTERS = [
 
 export default function JobsScreen() {
   const user = useAuthStore((s) => s.user);
+  const insets = useSafeAreaInsets();
+  const listBottomPad = insets.bottom + TAB_BAR_CORE + spacing.xl;
+
   const [jobs, setJobs] = useState<JobListItem[]>([]);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [unread, setUnread] = useState(0);
@@ -186,18 +193,20 @@ export default function JobsScreen() {
 
   if (loading && !refreshing && jobs.length === 0) {
     return (
-      <Screen>
+      <View style={styles.root}>
+        <StatusBar style="light" />
         <HomeHeader user={user} unread={unread} searchSlot={searchBar} />
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.brandLight} />
         </View>
-      </Screen>
+      </View>
     );
   }
 
   if (error && jobs.length === 0) {
     return (
-      <Screen>
+      <View style={styles.root}>
+        <StatusBar style="light" />
         {listHeader}
         <EmptyState
           title="Could not load jobs"
@@ -208,16 +217,22 @@ export default function JobsScreen() {
             void load(q, filter);
           }}
         />
-      </Screen>
+      </View>
     );
   }
 
   return (
-    <Screen>
+    <View style={styles.root}>
+      <StatusBar style="light" />
       <FlatList
         data={jobs}
         keyExtractor={(item) => item._id}
-        contentContainerStyle={jobs.length ? styles.list : styles.listEmpty}
+        style={styles.listFill}
+        contentContainerStyle={[
+          jobs.length ? styles.listContent : styles.listEmpty,
+          { paddingBottom: listBottomPad },
+        ]}
+        showsVerticalScrollIndicator={false}
         ListHeaderComponent={listHeader}
         refreshControl={
           <RefreshControl
@@ -245,19 +260,23 @@ export default function JobsScreen() {
           <EmptyState title="No jobs match your search" subtitle="Try different keywords or filters." />
         }
         renderItem={({ item }) => (
-          <JobCard
-            job={item}
-            saved={savedIds.has(item._id)}
-            onSave={user?.role === "job_seeker" ? () => void toggleSave(item._id) : undefined}
-            onPress={() => router.push(`/job/${item._id}`)}
-          />
+          <View style={styles.jobRow}>
+            <JobCard
+              job={item}
+              saved={savedIds.has(item._id)}
+              onSave={user?.role === "job_seeker" ? () => void toggleSave(item._id) : undefined}
+              onPress={() => router.push(`/job/${item._id}`)}
+            />
+          </View>
         )}
       />
-    </Screen>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: colors.brand50 },
+  listFill: { flex: 1 },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   searchBox: {
     flexDirection: "row",
@@ -275,7 +294,7 @@ const styles = StyleSheet.create({
     color: colors.slate900,
     paddingVertical: 12,
   },
-  filterScroll: { marginTop: spacing.sm },
+  filterScroll: { marginTop: spacing.sm, marginBottom: spacing.xs },
   filters: {
     gap: 8,
     paddingHorizontal: spacing.md,
@@ -292,8 +311,9 @@ const styles = StyleSheet.create({
   chipOn: { backgroundColor: colors.brand, borderColor: colors.brand },
   chipText: { fontSize: 13, fontWeight: "600", color: colors.slate500 },
   chipTextOn: { color: colors.white },
-  list: { paddingHorizontal: spacing.md, paddingBottom: 100 },
-  listEmpty: { flexGrow: 1, paddingBottom: 100 },
+  listContent: { flexGrow: 0 },
+  listEmpty: { flexGrow: 1 },
+  jobRow: { paddingHorizontal: spacing.md, marginBottom: 2 },
   resultCount: {
     fontSize: 13,
     fontWeight: "600",

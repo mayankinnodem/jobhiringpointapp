@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { appAlert } from "@/components/ui/AppAlert";
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -22,7 +22,7 @@ import {
 import { getApiErrorMessage } from "@/api/client";
 import { AppButton } from "@/components/ui/AppButton";
 import { EmptyState } from "@/components/EmptyState";
-import { Screen } from "@/components/ui/Screen";
+import { StackPageShell } from "@/components/navigation/StackPageShell";
 import { colors, radius, shadow, spacing } from "@/theme";
 import type { JobAlertItem } from "@/types";
 
@@ -100,9 +100,7 @@ export default function JobAlertsScreen() {
   }
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Job alerts", headerTintColor: colors.brand }} />
-      <Screen edges={["left", "right", "bottom"]}>
+    <StackPageShell title="Job alerts">
         {loading ? (
           <View style={styles.center}>
             <ActivityIndicator size="large" color={colors.brandLight} />
@@ -158,8 +156,7 @@ export default function JobAlertsScreen() {
             )}
           />
         )}
-      </Screen>
-    </>
+    </StackPageShell>
   );
 }
 

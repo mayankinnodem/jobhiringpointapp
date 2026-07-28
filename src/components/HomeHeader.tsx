@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { type ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { HeaderBrand } from "@/components/HeaderBrand";
 import { colors, brandGradient, radius, spacing } from "@/theme";
@@ -16,10 +17,14 @@ export function HomeHeader({
   unread: number;
   searchSlot?: ReactNode;
 }) {
+  const insets = useSafeAreaInsets();
   const first = user?.name?.split(" ")[0] ?? "there";
 
   return (
-    <LinearGradient colors={[...brandGradient]} style={styles.grad}>
+    <LinearGradient
+      colors={[...brandGradient]}
+      style={[styles.grad, { paddingTop: insets.top + spacing.sm }]}
+    >
       <View style={styles.topRow}>
         <HeaderBrand />
         <Pressable style={styles.bell} onPress={() => router.push("/notifications")}>
@@ -58,10 +63,9 @@ function StatPill({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; label
 const styles = StyleSheet.create({
   grad: {
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.xs,
-    paddingBottom: spacing.md,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
+    paddingBottom: spacing.lg,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   topRow: {
     flexDirection: "row",

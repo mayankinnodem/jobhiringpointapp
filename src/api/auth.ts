@@ -51,8 +51,9 @@ export async function verifyOtp(payload: {
   purpose: "register" | "login";
   expectedRole?: UserRole;
 }) {
+  const identifier = payload.identifier.trim();
   const { data } = await api.post<AuthResponse>("/api/auth/otp/verify", {
-    identifier: payload.identifier.trim(),
+    identifier,
     otp: normalizeOtpInput(payload.otp),
     purpose: payload.purpose,
     expectedRole: payload.expectedRole,

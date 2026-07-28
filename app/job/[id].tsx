@@ -25,7 +25,7 @@ import { getApiErrorMessage } from "@/api/client";
 import { saveJob, unsaveJob } from "@/api/extras";
 import { AppButton } from "@/components/ui/AppButton";
 import { JobCard } from "@/components/JobCard";
-import { Screen } from "@/components/ui/Screen";
+import { StackPageShell } from "@/components/navigation/StackPageShell";
 import { useAuthStore } from "@/store/authStore";
 import { colors, radius, shadow, spacing } from "@/theme";
 import type { JobListItem, RecruiterRef } from "@/types";
@@ -194,18 +194,22 @@ export default function JobDetailScreen() {
 
   if (loading) {
     return (
-      <Screen style={styles.center}>
-        <ActivityIndicator size="large" color={colors.brandLight} />
-      </Screen>
+      <StackPageShell title="Job details">
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.brandLight} />
+        </View>
+      </StackPageShell>
     );
   }
 
   if (!job) {
     return (
-      <Screen style={styles.center}>
-        <Ionicons name="search-outline" size={48} color={colors.slate400} />
-        <Text style={styles.muted}>Job not found</Text>
-      </Screen>
+      <StackPageShell title="Job details">
+        <View style={styles.center}>
+          <Ionicons name="search-outline" size={48} color={colors.slate400} />
+          <Text style={styles.muted}>Job not found</Text>
+        </View>
+      </StackPageShell>
     );
   }
 
@@ -218,7 +222,8 @@ export default function JobDetailScreen() {
   const isRecruiterOwner = user?.role === "recruiter" && recruiterIdFromJob(job) === user.id;
 
   return (
-    <Screen edges={["left", "right", "bottom"]}>
+    <StackPageShell title={job.title.length > 42 ? `${job.title.slice(0, 42)}…` : job.title}>
+      <View style={styles.page}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <LinearGradient colors={[colors.brand, colors.brandDark]} style={styles.hero}>
           {job.isFeatured ? (
@@ -337,7 +342,8 @@ export default function JobDetailScreen() {
           <AppButton label="Edit job" variant="outline" onPress={() => router.push(`/recruiter/post-job?id=${id}`)} style={{ flex: 1 }} />
         </View>
       ) : null}
-    </Screen>
+      </View>
+    </StackPageShell>
   );
 }
 
@@ -351,6 +357,7 @@ function MetaChip({ icon, label }: { icon: keyof typeof Ionicons.glyphMap; label
 }
 
 const styles = StyleSheet.create({
+  page: { flex: 1 },
   scroll: { flex: 1, backgroundColor: colors.brand50 },
   content: { paddingBottom: 16 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },

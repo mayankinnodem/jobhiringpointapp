@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
 import { useEffect } from "react";
 import { Platform, StyleSheet, Text, View, type ColorValue } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { appAlert } from "@/components/ui/AppAlert";
 import { useChatUnreadBadge } from "@/hooks/useChatUnreadBadge";
 import { useAuthStore } from "@/store/authStore";
@@ -14,6 +15,8 @@ export default function TabsLayout() {
   const isRecruiter = user?.role === "recruiter";
   const showMessages = isSeeker || isRecruiter;
   const { count: chatUnread } = useChatUnreadBadge(showMessages);
+  const insets = useSafeAreaInsets();
+  const tabBarHeight = (Platform.OS === "ios" ? 56 : 62) + insets.bottom;
 
   useEffect(() => {
     if (user?.role === "admin") {
@@ -37,10 +40,15 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        sceneStyle: { backgroundColor: colors.brand50 },
         tabBarActiveTintColor: colors.brand,
         tabBarInactiveTintColor: colors.slate400,
         tabBarLabelStyle: { fontSize: 11, fontWeight: "700", marginBottom: Platform.OS === "ios" ? 0 : 4 },
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: {
+          ...styles.tabBar,
+          height: tabBarHeight,
+          paddingBottom: Math.max(insets.bottom, Platform.OS === "ios" ? 8 : 6),
+        },
         tabBarItemStyle: { paddingTop: 4 },
       }}
     >
@@ -153,7 +161,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderTopColor: colors.brand100,
     borderTopWidth: 1,
-    height: Platform.OS === "ios" ? 86 : 62,
     paddingTop: 6,
     elevation: 16,
     shadowColor: "#002d62",

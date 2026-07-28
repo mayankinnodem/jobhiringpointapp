@@ -24,6 +24,7 @@ export default function RegisterScreen() {
 
   return (
     <AuthShell
+      showBack
       title="Create your account"
       subtitle="Register with email — mobile OTP when required by admin settings"
     >

@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { fetchSeekerProfile } from "@/api/profile";
 import { AppButton } from "@/components/ui/AppButton";
 import { SwitchRoleCard } from "@/components/SwitchRoleCard";
@@ -14,6 +15,7 @@ import { colors, radius, shadow, spacing } from "@/theme";
 export default function ProfileScreen() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
+  const insets = useSafeAreaInsets();
   const [profilePercent, setProfilePercent] = useState<number | null>(null);
 
   useEffect(() => {
@@ -42,9 +44,12 @@ export default function ProfileScreen() {
   }
 
   return (
-    <Screen edges={["top", "left", "right"]}>
+    <Screen edges={["left", "right", "bottom"]}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <LinearGradient colors={[colors.brand, colors.brandDark]} style={styles.hero}>
+        <LinearGradient
+          colors={[colors.brand, colors.brandDark]}
+          style={[styles.hero, { paddingTop: insets.top + spacing.lg }]}
+        >
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>{user.name.charAt(0).toUpperCase()}</Text>
           </View>
@@ -141,7 +146,6 @@ function MenuRow({
 const styles = StyleSheet.create({
   hero: {
     alignItems: "center",
-    paddingTop: spacing.lg,
     paddingBottom: spacing.xl,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,

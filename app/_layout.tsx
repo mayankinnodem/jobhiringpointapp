@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SessionGuard } from "@/components/SessionGuard";
 import { useAuthStore } from "@/store/authStore";
 import { LoadingScreen } from "@/components/LoadingScreen";
@@ -32,6 +33,7 @@ export default function RootLayout() {
   }
 
   return (
+    <SafeAreaProvider>
     <AppAlertProvider>
       <SessionGuard />
       <StatusBar style="dark" />
@@ -52,5 +54,6 @@ export default function RootLayout() {
         <Stack.Screen name="recruiter/applicants/[jobId]" options={{ ...headerOptions, title: "Applicants" }} />
       </Stack>
     </AppAlertProvider>
+    </SafeAreaProvider>
   );
 }

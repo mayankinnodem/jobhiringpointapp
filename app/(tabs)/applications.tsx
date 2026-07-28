@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import { appAlert } from "@/components/ui/AppAlert";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -20,6 +19,7 @@ import {
 } from "@/api/jobs";
 import { getApiErrorMessage } from "@/api/client";
 import { EmptyState } from "@/components/EmptyState";
+import { TabGradientHeader } from "@/components/TabGradientHeader";
 import { Screen } from "@/components/ui/Screen";
 import { useAuthStore } from "@/store/authStore";
 import { colors, radius, shadow, spacing } from "@/theme";
@@ -113,15 +113,13 @@ export default function ApplicationsScreen() {
 
   if (isRecruiter) {
     return (
-      <Screen edges={["top", "left", "right"]}>
-        <LinearGradient colors={[colors.brand, colors.brandDark]} style={styles.header}>
-          <Text style={styles.title}>Recruiter dashboard</Text>
-          <Text style={styles.sub}>Manage jobs and review applicants</Text>
+      <Screen edges={["left", "right", "bottom"]}>
+        <TabGradientHeader title="Recruiter dashboard" subtitle="Manage jobs and review applicants">
           <Pressable style={styles.postBtn} onPress={() => router.push("/recruiter/post-job")}>
             <Ionicons name="add" size={20} color={colors.brand} />
             <Text style={styles.postBtnText}>Post new job</Text>
           </Pressable>
-        </LinearGradient>
+        </TabGradientHeader>
 
         {stats ? (
           <View style={styles.statsGrid}>
@@ -172,11 +170,8 @@ export default function ApplicationsScreen() {
   }
 
   return (
-    <Screen edges={["top", "left", "right"]}>
-      <LinearGradient colors={[colors.brand, colors.brandDark]} style={styles.header}>
-        <Text style={styles.title}>My applications</Text>
-        <Text style={styles.sub}>Track every job you applied to</Text>
-      </LinearGradient>
+    <Screen edges={["left", "right", "bottom"]}>
+      <TabGradientHeader title="My applications" subtitle="Track every job you applied to" />
 
       <FlatList
         data={applications}
@@ -250,9 +245,6 @@ function StatCard({ icon, label, value, color = colors.brand }: { icon: keyof ty
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  header: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.lg, borderBottomLeftRadius: 20, borderBottomRightRadius: 20 },
-  title: { fontSize: 24, fontWeight: "800", color: colors.white },
-  sub: { fontSize: 13, color: "rgba(255,255,255,0.7)", marginTop: 4 },
   postBtn: {
     flexDirection: "row", alignItems: "center", gap: 6, alignSelf: "flex-start",
     marginTop: 12, backgroundColor: colors.white, paddingHorizontal: 14, paddingVertical: 8, borderRadius: radius.full,

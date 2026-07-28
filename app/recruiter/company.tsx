@@ -1,4 +1,4 @@
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
 import { appAlert } from "@/components/ui/AppAlert";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -12,7 +12,7 @@ import { fetchRecruiterCompany, saveRecruiterCompany } from "@/api/recruiter";
 import { getApiErrorMessage } from "@/api/client";
 import { AppButton } from "@/components/ui/AppButton";
 import { AppInput } from "@/components/ui/AppInput";
-import { Screen } from "@/components/ui/Screen";
+import { StackPageShell } from "@/components/navigation/StackPageShell";
 import { colors, radius, shadow, spacing } from "@/theme";
 
 export default function RecruiterCompanyScreen() {
@@ -71,16 +71,16 @@ export default function RecruiterCompanyScreen() {
 
   if (loading) {
     return (
-      <Screen style={styles.center}>
-        <ActivityIndicator size="large" color={colors.brandLight} />
-      </Screen>
+      <StackPageShell title="Company profile">
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.brandLight} />
+        </View>
+      </StackPageShell>
     );
   }
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Company profile", headerTintColor: colors.brand }} />
-      <Screen edges={["left", "right", "bottom"]}>
+    <StackPageShell title="Company profile">
         <ScrollView contentContainerStyle={styles.scroll}>
           <View style={styles.info}>
             <Text style={styles.infoText}>
@@ -96,8 +96,7 @@ export default function RecruiterCompanyScreen() {
             <AppButton label="Save company" onPress={() => void onSave()} loading={saving} />
           </View>
         </ScrollView>
-      </Screen>
-    </>
+    </StackPageShell>
   );
 }
 

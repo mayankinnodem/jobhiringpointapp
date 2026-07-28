@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "scheme": "jobhiringpoint",
     "splash": {
-      "image": "./assets/logo.png",
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -18,16 +18,28 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jobhiringpoint.app"
+      "bundleIdentifier": "com.jobhiringpoint.app1",
+      "icon": "./assets/icon.png",
+      "splash": {
+        "image": "./assets/splash-icon.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff"
+      }
     },
     "android": {
+      "icon": "./assets/icon.png",
       "adaptiveIcon": {
-        "backgroundColor": "#002d62",
         "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundColor": "#ffffff",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "package": "com.jobhiringpoint.app",
+      "splash": {
+        "image": "./assets/splash-icon.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.jobhiringpoint.app1",
       "predictiveBackGestureEnabled": false,
       "softwareKeyboardLayoutMode": "resize"
     },
@@ -38,9 +50,9 @@
       "apiUrl": "https://jobhiringpoint.com",
       "router": {},
       "eas": {
-        "projectId": "6c45c185-20e6-41e5-bb05-927d0e191d43"
+        "projectId": "5092cfa2-05d2-4354-9a21-cd1c7c04c42b"
       }
     },
-    "owner": "mayankwebdeveloper"
+    "owner": "dialexportmart"
   }
 }

@@ -1,4 +1,4 @@
-import { router, Stack, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { appAlert } from "@/components/ui/AppAlert";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -19,7 +19,7 @@ import { fetchCategories } from "@/api/seeker";
 import { getApiErrorMessage } from "@/api/client";
 import { AppButton } from "@/components/ui/AppButton";
 import { AppInput } from "@/components/ui/AppInput";
-import { Screen } from "@/components/ui/Screen";
+import { StackPageShell } from "@/components/navigation/StackPageShell";
 import { colors, radius, spacing } from "@/theme";
 
 const JOB_TYPES = [
@@ -125,16 +125,16 @@ export default function PostJobScreen() {
 
   if (loading) {
     return (
-      <Screen style={styles.center}>
-        <ActivityIndicator size="large" color={colors.brandLight} />
-      </Screen>
+      <StackPageShell title={isEdit ? "Edit job" : "Post a job"}>
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.brandLight} />
+        </View>
+      </StackPageShell>
     );
   }
 
   return (
-    <>
-      <Stack.Screen options={{ title: isEdit ? "Edit job" : "Post a job", headerTintColor: colors.brand }} />
-      <Screen edges={["left", "right", "bottom"]}>
+    <StackPageShell title={isEdit ? "Edit job" : "Post a job"}>
         {!hasCompany ? (
           <Pressable style={styles.companyBanner} onPress={() => router.push("/recruiter/company")}>
             <Text style={styles.companyBannerText}>
@@ -189,8 +189,7 @@ export default function PostJobScreen() {
             <AppButton label="Save as draft" variant="outline" onPress={() => void onSubmit(true)} disabled={saving} />
           </View>
         </ScrollView>
-      </Screen>
-    </>
+    </StackPageShell>
   );
 }
 

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, Stack, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -15,7 +15,7 @@ import { fetchCompany } from "@/api/seeker";
 import { getApiErrorMessage } from "@/api/client";
 import { EmptyState } from "@/components/EmptyState";
 import { JobCard } from "@/components/JobCard";
-import { Screen } from "@/components/ui/Screen";
+import { StackPageShell } from "@/components/navigation/StackPageShell";
 import { colors, radius, spacing } from "@/theme";
 import type { CompanyItem, JobListItem } from "@/types";
 
@@ -45,26 +45,26 @@ export default function CompanyDetailScreen() {
 
   if (loading) {
     return (
-      <Screen style={styles.center}>
-        <ActivityIndicator size="large" color={colors.brandLight} />
-      </Screen>
+      <StackPageShell title="Company">
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.brandLight} />
+        </View>
+      </StackPageShell>
     );
   }
 
   if (error || !company) {
     return (
-      <Screen>
+      <StackPageShell title="Company">
         <EmptyState title="Company not found" subtitle={error ?? ""} actionLabel="Go back" onAction={() => router.back()} />
-      </Screen>
+      </StackPageShell>
     );
   }
 
   const jobs = company.jobs ?? [];
 
   return (
-    <>
-      <Stack.Screen options={{ title: company.name, headerTintColor: colors.brand }} />
-      <Screen edges={["left", "right", "bottom"]}>
+    <StackPageShell title={company.name}>
         <FlatList
           data={jobs}
           keyExtractor={(item) => item._id}
@@ -104,8 +104,7 @@ export default function CompanyDetailScreen() {
             <JobCard job={item} onPress={() => router.push(`/job/${item._id}`)} />
           )}
         />
-      </Screen>
-    </>
+    </StackPageShell>
   );
 }
 

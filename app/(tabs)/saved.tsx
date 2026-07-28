@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -15,6 +14,7 @@ import { getApiErrorMessage } from "@/api/client";
 import { appAlert } from "@/components/ui/AppAlert";
 import { EmptyState } from "@/components/EmptyState";
 import { JobCard } from "@/components/JobCard";
+import { TabGradientHeader } from "@/components/TabGradientHeader";
 import { Screen } from "@/components/ui/Screen";
 import { colors, radius, spacing } from "@/theme";
 import type { JobListItem } from "@/types";
@@ -63,21 +63,16 @@ export default function SavedScreen() {
 
   if (error) {
     return (
-      <Screen edges={["top", "left", "right"]}>
-        <LinearGradient colors={[colors.brand, colors.brandDark]} style={styles.header}>
-          <Text style={styles.title}>Saved jobs</Text>
-        </LinearGradient>
+      <Screen edges={["left", "right", "bottom"]}>
+        <TabGradientHeader title="Saved jobs" />
         <EmptyState title="Could not load" subtitle={error} actionLabel="Retry" onAction={() => { setLoading(true); void load(); }} />
       </Screen>
     );
   }
 
   return (
-    <Screen edges={["top", "left", "right"]}>
-      <LinearGradient colors={[colors.brand, colors.brandDark]} style={styles.header}>
-        <Text style={styles.title}>Saved jobs</Text>
-        <Text style={styles.sub}>Jobs you bookmarked for later</Text>
-      </LinearGradient>
+    <Screen edges={["left", "right", "bottom"]}>
+      <TabGradientHeader title="Saved jobs" subtitle="Jobs you bookmarked for later" />
 
       <FlatList
         data={jobs}
@@ -116,15 +111,6 @@ export default function SavedScreen() {
 
 const styles = StyleSheet.create({
   center: { alignItems: "center", justifyContent: "center" },
-  header: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.lg,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-  title: { fontSize: 24, fontWeight: "800", color: colors.white },
-  sub: { fontSize: 13, color: "rgba(255,255,255,0.7)", marginTop: 4 },
-  list: { padding: spacing.md },
-  listEmpty: { flexGrow: 1 },
+  list: { padding: spacing.md, paddingBottom: spacing.xl },
+  listEmpty: { flexGrow: 1, paddingBottom: spacing.xl },
 });

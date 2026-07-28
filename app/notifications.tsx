@@ -18,7 +18,7 @@ import {
 } from "@/api/extras";
 import { getApiErrorMessage } from "@/api/client";
 import { EmptyState } from "@/components/EmptyState";
-import { Screen } from "@/components/ui/Screen";
+import { StackPageShell } from "@/components/navigation/StackPageShell";
 import { notificationRoute } from "@/lib/notification-links";
 import { useAuthStore } from "@/store/authStore";
 import { colors, radius, shadow, spacing } from "@/theme";
@@ -73,7 +73,7 @@ export default function NotificationsScreen() {
   }
 
   return (
-    <Screen edges={["left", "right", "bottom"]}>
+    <StackPageShell title="Notifications">
         {loading && !refreshing ? (
           <View style={styles.center}>
             <ActivityIndicator size="large" color={colors.brandLight} />
@@ -143,7 +143,7 @@ export default function NotificationsScreen() {
             )}
           />
         )}
-    </Screen>
+    </StackPageShell>
   );
 }
 

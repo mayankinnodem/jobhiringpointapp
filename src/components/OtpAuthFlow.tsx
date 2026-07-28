@@ -10,16 +10,13 @@ import {
 import { getApiErrorMessage } from "@/api/client";
 import {
   isCompleteOtp,
-  normalizeOtpInput,
-  OTP_LENGTH,
-  OTP_PLACEHOLDER,
-  otpFieldLabel,
   otpValidationMessage,
 } from "@/constants/otp";
 import { isValidWebsiteInput } from "@/lib/website";
 import { useAuthStore } from "@/store/authStore";
 import { AppButton } from "@/components/ui/AppButton";
 import { AppInput } from "@/components/ui/AppInput";
+import { OtpCodeInput } from "@/components/OtpCodeInput";
 import { colors, radius, spacing } from "@/theme";
 import type { PublicUser, UserRole } from "@/types";
 
@@ -242,22 +239,11 @@ export function OtpAuthFlow({
         <View style={styles.banner}>
           <Ionicons name="chatbubble-ellipses-outline" size={18} color={colors.brandLight} />
           <Text style={styles.hint}>
-            {channel === "sms" ? "OTP sent to " : "Enter code for "}
+            {channel === "sms" ? "6-digit SMS OTP sent to " : "6-digit code for "}
             <Text style={styles.bold}>{masked}</Text>
           </Text>
         </View>
-        <AppInput
-          label={otpFieldLabel()}
-          icon="keypad-outline"
-          keyboardType="number-pad"
-          textContentType="oneTimeCode"
-          autoComplete="sms-otp"
-          maxLength={OTP_LENGTH}
-          value={otp}
-          onChangeText={(t) => setOtp(normalizeOtpInput(t))}
-          placeholder={OTP_PLACEHOLDER}
-          inputStyle={styles.otpInput}
-        />
+        <OtpCodeInput value={otp} onChange={setOtp} disabled={loading} />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <AppButton label="Verify & sign in" onPress={() => void onVerify()} loading={loading} disabled={!isCompleteOtp(otp)} />
         <View style={styles.row}>
@@ -280,21 +266,10 @@ export function OtpAuthFlow({
         <View style={styles.banner}>
           <Ionicons name="chatbubble-ellipses-outline" size={18} color={colors.brandLight} />
           <Text style={styles.hint}>
-            OTP sent to <Text style={styles.bold}>{masked}</Text>
+            6-digit SMS OTP sent to <Text style={styles.bold}>{masked}</Text>
           </Text>
         </View>
-        <AppInput
-          label={otpFieldLabel()}
-          icon="keypad-outline"
-          keyboardType="number-pad"
-          textContentType="oneTimeCode"
-          autoComplete="sms-otp"
-          maxLength={OTP_LENGTH}
-          value={otp}
-          onChangeText={(t) => setOtp(normalizeOtpInput(t))}
-          placeholder={OTP_PLACEHOLDER}
-          inputStyle={styles.otpInput}
-        />
+        <OtpCodeInput value={otp} onChange={setOtp} disabled={loading} />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <AppButton label="Verify & create account" onPress={() => void onVerify()} loading={loading} disabled={!isCompleteOtp(otp)} />
         <View style={styles.row}>
@@ -484,7 +459,6 @@ const styles = StyleSheet.create({
   stepHint: { fontSize: 13, color: colors.slate600, marginBottom: spacing.sm },
   hint: { fontSize: 13, color: colors.slate600, flex: 1, lineHeight: 18 },
   bold: { fontWeight: "700", color: colors.brand },
-  otpInput: { letterSpacing: 6, fontSize: 20, fontWeight: "700", textAlign: "center" },
   error: { color: colors.red, fontSize: 13, marginBottom: spacing.sm },
   row: { flexDirection: "row", justifyContent: "space-between", marginTop: spacing.md },
   link: { color: colors.brandLight, fontWeight: "700", fontSize: 13, textAlign: "center" },

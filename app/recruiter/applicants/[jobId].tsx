@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { appAlert } from "@/components/ui/AppAlert";
-import { router, Stack, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,7 +14,7 @@ import {
 import { fetchJobApplicants, updateApplicationStatus } from "@/api/recruiter";
 import { getApiErrorMessage } from "@/api/client";
 import { EmptyState } from "@/components/EmptyState";
-import { Screen } from "@/components/ui/Screen";
+import { StackPageShell } from "@/components/navigation/StackPageShell";
 import { colors, radius, shadow, spacing } from "@/theme";
 import type { ApplicationStatus } from "@/types";
 import type { RecruiterApplicant } from "@/api/recruiter";
@@ -69,16 +69,16 @@ export default function ApplicantsScreen() {
 
   if (loading) {
     return (
-      <Screen style={styles.center}>
-        <ActivityIndicator size="large" color={colors.brandLight} />
-      </Screen>
+      <StackPageShell title="Applicants">
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.brandLight} />
+        </View>
+      </StackPageShell>
     );
   }
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Applicants", headerTintColor: colors.brand }} />
-      <Screen edges={["left", "right", "bottom"]}>
+    <StackPageShell title="Applicants">
         <FlatList
           data={applicants}
           keyExtractor={(item) => item._id}
@@ -120,8 +120,7 @@ export default function ApplicantsScreen() {
             );
           }}
         />
-      </Screen>
-    </>
+    </StackPageShell>
   );
 }
 
