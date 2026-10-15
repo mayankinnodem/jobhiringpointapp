@@ -227,7 +227,7 @@ export default function CompleteProfileScreen() {
 
   if (loading) {
     return (
-      <StackPageShell title="Edit profile" onBack={handleBack}>
+      <StackPageShell title="Job seeker profile" onBack={handleBack}>
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.brandLight} />
         </View>
@@ -238,11 +238,15 @@ export default function CompleteProfileScreen() {
   const percent = meta?.canApply.percent ?? 0;
 
   return (
-    <StackPageShell title="Edit profile" onBack={handleBack}>
+    <StackPageShell title="Job seeker profile" onBack={handleBack}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <LinearGradient colors={[colors.brand, colors.brandDark]} style={styles.hero}>
-          <Text style={styles.title}>Your profile</Text>
-          <Text style={styles.sub}>{percent >= MIN_APPLY_PERCENT ? "Ready to apply" : `${percent}% complete`}</Text>
+          <Text style={styles.title}>Job seeker profile</Text>
+          <Text style={styles.sub}>
+            {percent >= MIN_APPLY_PERCENT
+              ? "Ready to apply — personal profile (not a company page)"
+              : `${percent}% complete — skills, location & resume (separate from recruiter company pages)`}
+          </Text>
         </LinearGradient>
 
         <ProfileSection icon="person-outline" title="About you" subtitle="Tap to fill">
@@ -399,7 +403,7 @@ const styles = StyleSheet.create({
     borderColor: "#ffddb3",
   },
   missingHint: { flex: 1, fontSize: 12, color: colors.slate600, lineHeight: 18 },
-  salaryLabel: { fontSize: 14, fontWeight: "700", color: colors.slate800, marginBottom: 8 },
+  salaryLabel: { fontSize: 14, fontWeight: "700", color: colors.slate900, marginBottom: 8 },
   chipsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 },
   salaryChip: {
     borderRadius: radius.full,
@@ -413,7 +417,7 @@ const styles = StyleSheet.create({
   salaryChipText: { fontSize: 12, fontWeight: "600", color: colors.slate600 },
   salaryChipTextOn: { color: colors.white },
   relocateRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8 },
-  relocateText: { flex: 1, fontSize: 14, fontWeight: "600", color: colors.slate700 },
+  relocateText: { flex: 1, fontSize: 14, fontWeight: "600", color: colors.slate600 },
   optionalLink: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 8 },
   optionalText: { fontSize: 14, fontWeight: "600", color: colors.brand },
   optionalCard: {

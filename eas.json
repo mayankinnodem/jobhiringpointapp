@@ -18,9 +18,13 @@
       }
     },
     "production": {
+      "distribution": "store",
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_API_URL": "https://jobhiringpoint.com"
+      },
+      "android": {
+        "buildType": "app-bundle"
       }
     }
   },

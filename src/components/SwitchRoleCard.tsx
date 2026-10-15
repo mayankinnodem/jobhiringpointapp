@@ -44,8 +44,8 @@ export function SwitchRoleCard() {
   if (loading) {
     return (
       <View style={styles.card}>
-        <Text style={styles.title}>Account type</Text>
-        <Text style={styles.body}>Checking if you can switch…</Text>
+        <Text style={styles.label}>Account type</Text>
+        <Text style={styles.body}>Checking…</Text>
       </View>
     );
   }
@@ -53,10 +53,9 @@ export function SwitchRoleCard() {
   if (fetchError) {
     return (
       <View style={styles.card}>
-        <Text style={styles.title}>Account type</Text>
+        <Text style={styles.label}>Account type</Text>
         <Text style={styles.blocker}>{fetchError}</Text>
         <Pressable
-          style={styles.btn}
           onPress={() => {
             setLoading(true);
             setFetchError(null);
@@ -66,7 +65,7 @@ export function SwitchRoleCard() {
               .finally(() => setLoading(false));
           }}
         >
-          <Text style={styles.btnText}>Retry</Text>
+          <Text style={styles.link}>Retry</Text>
         </Pressable>
       </View>
     );
@@ -122,23 +121,29 @@ export function SwitchRoleCard() {
     );
   }
 
+  const target = roleLabel(eligibility.targetRole);
+
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>Wrong account type?</Text>
-      <Text style={styles.body}>
-        You registered as {roleLabel(eligibility.currentRole)}. Switch to{" "}
-        {roleLabel(eligibility.targetRole)} if you chose the wrong option.
-      </Text>
-      {eligibility.blockers.length > 0 ? (
-        <Text style={styles.blocker}>{eligibility.blockers.join("\n")}</Text>
-      ) : null}
+      <View style={styles.row}>
+        <View style={styles.meta}>
+          <Text style={styles.label}>Account type</Text>
+          <Text style={styles.value}>{roleLabel(eligibility.currentRole)}</Text>
+          <Text style={styles.body}>
+            Need to hire or apply instead? You can switch to {target}.
+          </Text>
+          {eligibility.blockers.length > 0 ? (
+            <Text style={styles.blocker}>{eligibility.blockers.join("\n")}</Text>
+          ) : null}
+        </View>
+      </View>
       <Pressable
         style={[styles.btn, (!eligibility.canSwitch || switching) && styles.btnOff]}
         disabled={!eligibility.canSwitch || switching}
         onPress={confirmSwitch}
       >
         <Text style={styles.btnText}>
-          {switching ? "Switching…" : `Switch to ${roleLabel(eligibility.targetRole)}`}
+          {switching ? "Switching…" : `Switch to ${target}`}
         </Text>
       </Pressable>
     </View>
@@ -147,34 +152,38 @@ export function SwitchRoleCard() {
 
 const styles = StyleSheet.create({
   card: {
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.md,
     backgroundColor: colors.white,
-    borderRadius: radius.lg,
-    padding: spacing.md,
+    borderRadius: radius.md,
+    padding: 14,
     borderWidth: 1,
     borderColor: colors.brand100,
+    marginBottom: spacing.sm,
   },
-  title: { fontSize: 15, fontWeight: "800", color: colors.brand },
-  body: { fontSize: 13, color: colors.slate500, marginTop: 6, lineHeight: 18 },
+  row: { flexDirection: "row", alignItems: "flex-start" },
+  meta: { flex: 1 },
+  label: { fontSize: 15, fontWeight: "700", color: colors.brand },
+  value: { fontSize: 13, fontWeight: "600", color: colors.slate500, marginTop: 2 },
+  body: { fontSize: 12, color: colors.slate400, marginTop: 6, lineHeight: 17 },
   blocker: {
-    marginTop: 10,
+    marginTop: 8,
     fontSize: 12,
     color: "#b45309",
     backgroundColor: "#fff8ee",
-    padding: 10,
-    borderRadius: radius.md,
-    lineHeight: 18,
+    padding: 8,
+    borderRadius: radius.sm,
+    lineHeight: 17,
   },
   btn: {
     marginTop: 12,
     alignSelf: "flex-start",
-    borderWidth: 2,
-    borderColor: colors.brandLight,
+    borderWidth: 1,
+    borderColor: colors.slate200,
     borderRadius: radius.md,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    backgroundColor: colors.slate50,
   },
   btnOff: { opacity: 0.45 },
-  btnText: { fontSize: 13, fontWeight: "700", color: colors.brandLight },
+  btnText: { fontSize: 13, fontWeight: "700", color: colors.slate600 },
+  link: { marginTop: 8, fontSize: 13, fontWeight: "700", color: colors.brandLight },
 });

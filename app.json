@@ -2,7 +2,7 @@
   "expo": {
     "name": "Job Hiring Point",
     "slug": "job-hiring-point",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -14,11 +14,15 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-status-bar"
     ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.jobhiringpoint.app1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      },
       "icon": "./assets/icon.png",
       "splash": {
         "image": "./assets/splash-icon.png",

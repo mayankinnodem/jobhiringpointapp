@@ -1,63 +1,70 @@
-import { Link, router } from "expo-router";
-import { useState } from "react";
+import { Link, router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { apiBaseUrl } from "@/api/client";
 import { AuthShell } from "@/components/AuthShell";
+import { RoleContextBanner } from "@/components/auth/AuthSteps";
 import { OtpAuthFlow } from "@/components/OtpAuthFlow";
 import { AppInput, RoleCard } from "@/components/ui/AppInput";
+import { afterAuthHint, authSubtitle } from "@/lib/auth-copy";
 import { resolvePostAuthPath } from "@/lib/auth-redirect";
 import { colors, spacing } from "@/theme";
 import type { PublicUser } from "@/types";
 
 export default function RegisterScreen() {
+  const params = useLocalSearchParams<{ role?: string }>();
   const [name, setName] = useState("");
-  const [role, setRole] = useState<"job_seeker" | "recruiter">("job_seeker");
+  const [role, setRole] = useState<"job_seeker" | "recruiter">(
+    params.role === "recruiter" ? "recruiter" : "job_seeker"
+  );
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  useEffect(() => {
+    if (params.role === "recruiter") setRole("recruiter");
+    if (params.role === "seeker" || params.role === "job_seeker") setRole("job_seeker");
+  }, [params.role]);
 
   function onSuccess(user: PublicUser) {
     router.replace(resolvePostAuthPath(user.role, "register") as "/complete-profile");
   }
 
-  const canContinue =
-    acceptedTerms && name.trim().length >= 2;
+  const canContinue = acceptedTerms && name.trim().length >= 2;
 
   return (
-    <AuthShell
-      showBack
-      title="Create your account"
-      subtitle="Register with email — mobile OTP when required by admin settings"
-    >
-      <Text style={styles.sectionLabel}>Register as</Text>
+    <AuthShell showBack title="Create your account" subtitle={authSubtitle("register", role)}>
+      <Text style={styles.sectionLabel}>I want to</Text>
       <View style={styles.roleRow}>
         <RoleCard
-          title="Job Seeker"
-          subtitle="Apply to jobs"
+          title="Find a job"
+          subtitle="Job seeker profile"
           selected={role === "job_seeker"}
           onPress={() => setRole("job_seeker")}
           icon={<Ionicons name="search-outline" size={24} color={colors.brand} />}
         />
         <RoleCard
-          title="Recruiter"
-          subtitle="Post jobs & hire"
+          title="Hire talent"
+          subtitle="Recruiter / company"
           selected={role === "recruiter"}
           onPress={() => setRole("recruiter")}
           icon={<Ionicons name="people-outline" size={24} color={colors.brand} />}
         />
       </View>
 
+      <RoleContextBanner
+        title={role === "recruiter" ? "Recruiter registration" : "Job seeker registration"}
+        body={afterAuthHint(role, "register")}
+      />
+
       <AppInput
         label="Full name"
         icon="person-outline"
         value={name}
         onChangeText={setName}
-        placeholder="Your full name"
+        placeholder={role === "recruiter" ? "Your name (hiring contact)" : "As on your resume"}
       />
 
-      <Pressable
-        style={styles.termsRow}
-        onPress={() => setAcceptedTerms((v) => !v)}
-      >
+      <Pressable style={styles.termsRow} onPress={() => setAcceptedTerms((v) => !v)}>
         <Ionicons
           name={acceptedTerms ? "checkbox" : "square-outline"}
           size={22}
@@ -97,6 +104,12 @@ export default function RegisterScreen() {
         </Text>
       )}
 
+      <Text style={styles.note}>
+        {role === "job_seeker"
+          ? "Free forever for job seekers — never pay to apply."
+          : "Free plan includes limited job posts. Upgrade anytime."}
+      </Text>
+
       <View style={styles.footer}>
         <Text style={styles.footerText}>Already registered? </Text>
         <Link href="/(auth)/login" asChild>
@@ -116,7 +129,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.6,
   },
-  roleRow: { flexDirection: "row", gap: 10, marginBottom: spacing.md },
+  roleRow: { flexDirection: "row", gap: 10, marginBottom: spacing.sm },
   termsRow: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -126,6 +139,13 @@ const styles = StyleSheet.create({
   termsText: { flex: 1, fontSize: 12, color: colors.slate600, lineHeight: 18 },
   termsLink: { color: colors.brandLight, fontWeight: "700" },
   hint: { fontSize: 13, color: colors.slate400, textAlign: "center", marginTop: spacing.sm },
+  note: {
+    marginTop: spacing.md,
+    fontSize: 12,
+    color: colors.slate500,
+    textAlign: "center",
+    lineHeight: 17,
+  },
   footer: {
     flexDirection: "row",
     justifyContent: "center",

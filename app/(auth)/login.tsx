@@ -3,6 +3,7 @@ import { appAlert } from "@/components/ui/AppAlert";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Linking,
   Pressable,
   StyleSheet,
   Text,
@@ -10,10 +11,12 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { loginWithEmail } from "@/api/auth";
-import { getApiErrorMessage } from "@/api/client";
+import { apiBaseUrl, getApiErrorMessage } from "@/api/client";
 import { AuthShell } from "@/components/AuthShell";
+import { RoleContextBanner } from "@/components/auth/AuthSteps";
 import { OtpAuthFlow } from "@/components/OtpAuthFlow";
 import { AppInput, RoleCard } from "@/components/ui/AppInput";
+import { afterAuthHint, authSubtitle, roleDisplayName } from "@/lib/auth-copy";
 import { resolvePostAuthPath } from "@/lib/auth-redirect";
 import { colors, radius, spacing } from "@/theme";
 import type { PublicUser } from "@/types";
@@ -36,7 +39,7 @@ export default function LoginScreen() {
       if (user.role !== role && user.role !== "admin") {
         appAlert(
           "Signed in",
-          `This account is registered as ${user.role === "recruiter" ? "Recruiter" : "Job Seeker"}.`
+          `This account is a ${roleDisplayName(user.role)}. Opening your ${user.role === "recruiter" ? "hiring" : "job search"} home.`
         );
       }
       router.replace(resolvePostAuthPath(user.role, "login") as "/(tabs)");
@@ -48,14 +51,7 @@ export default function LoginScreen() {
   }
 
   return (
-    <AuthShell
-      title="Welcome back"
-      subtitle={
-        showEmailLogin
-          ? "Sign in with email and password"
-          : "Sign in with email or mobile OTP"
-      }
-    >
+    <AuthShell title="Welcome back" subtitle={authSubtitle("login", role)}>
       <Text style={styles.sectionLabel}>I am a</Text>
       <View style={styles.roleRow}>
         <RoleCard
@@ -67,41 +63,41 @@ export default function LoginScreen() {
         />
         <RoleCard
           title="Recruiter"
-          subtitle="Hire top talent"
+          subtitle="Post jobs & hire"
           selected={role === "recruiter"}
           onPress={() => setRole("recruiter")}
           icon={<Ionicons name="business-outline" size={24} color={colors.brand} />}
         />
       </View>
 
-      <OtpAuthFlow
-        purpose="login"
-        role={role}
-        onRoleMismatch={(actual) => {
-          setRole(actual as "job_seeker" | "recruiter");
-        }}
-        onSuccess={(user: PublicUser) => {
-          if (user.role !== role) {
-            appAlert(
-              "Signed in",
-              `This account is registered as ${user.role === "recruiter" ? "Recruiter" : "Job Seeker"}. You can switch account type in Profile.`
-            );
-          }
-          router.replace(resolvePostAuthPath(user.role, "login") as "/(tabs)");
-        }}
+      <RoleContextBanner
+        title={role === "recruiter" ? "Recruiter sign-in" : "Job seeker sign-in"}
+        body={afterAuthHint(role, "login")}
       />
 
-      <Pressable
-        style={styles.toggleEmail}
-        onPress={() => setShowEmailLogin((v) => !v)}
-      >
-        <Text style={styles.toggleEmailText}>
-          {showEmailLogin ? "Use mobile OTP instead" : "Sign in with email instead"}
-        </Text>
-      </Pressable>
-
-      {showEmailLogin ? (
+      {!showEmailLogin ? (
+        <>
+          <Text style={styles.methodLabel}>Sign in with OTP (recommended)</Text>
+          <OtpAuthFlow
+            purpose="login"
+            role={role}
+            onRoleMismatch={(actual) => {
+              setRole(actual as "job_seeker" | "recruiter");
+            }}
+            onSuccess={(user: PublicUser) => {
+              if (user.role !== role) {
+                appAlert(
+                  "Signed in",
+                  `This account is a ${roleDisplayName(user.role)}. You can switch account type later in Profile.`
+                );
+              }
+              router.replace(resolvePostAuthPath(user.role, "login") as "/(tabs)");
+            }}
+          />
+        </>
+      ) : (
         <View style={styles.emailBox}>
+          <Text style={styles.methodLabel}>Sign in with email & password</Text>
           <AppInput
             label="Email"
             icon="mail-outline"
@@ -131,18 +127,35 @@ export default function LoginScreen() {
             )}
           </Pressable>
         </View>
-      ) : null}
+      )}
 
-      {__DEV__ ? (
-        <Text style={styles.hint}>
-          Dev login: 9999999999 + OTP 999999 (run npm run seed in web).
+      <Pressable
+        style={styles.toggleEmail}
+        onPress={() => setShowEmailLogin((v) => !v)}
+      >
+        <Text style={styles.toggleEmailText}>
+          {showEmailLogin ? "← Use mobile / email OTP instead" : "Have a password? Sign in with email"}
         </Text>
-      ) : null}
+      </Pressable>
+
+      <View style={styles.legal}>
+        <Text style={styles.legalText}>
+          By continuing you agree to our{" "}
+          <Text style={styles.legalLink} onPress={() => void Linking.openURL(`${apiBaseUrl}/terms`)}>
+            Terms
+          </Text>
+          {" "}and{" "}
+          <Text style={styles.legalLink} onPress={() => void Linking.openURL(`${apiBaseUrl}/privacy`)}>
+            Privacy Policy
+          </Text>
+          .
+        </Text>
+      </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Don&apos;t have an account? </Text>
-        <Link href="/(auth)/register" asChild>
-          <Text style={styles.link}>Create free account</Text>
+        <Text style={styles.footerText}>New here? </Text>
+        <Link href={`/(auth)/register?role=${role === "recruiter" ? "recruiter" : "seeker"}` as "/(auth)/register"} asChild>
+          <Text style={styles.link}>Create {role === "recruiter" ? "recruiter" : "seeker"} account</Text>
         </Link>
       </View>
     </AuthShell>
@@ -158,14 +171,21 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.6,
   },
-  roleRow: { flexDirection: "row", gap: 10, marginBottom: spacing.md },
+  methodLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: colors.slate500,
+    marginBottom: 10,
+  },
+  roleRow: { flexDirection: "row", gap: 10, marginBottom: spacing.sm },
   toggleEmail: { marginTop: spacing.md, alignItems: "center" },
   toggleEmailText: {
     fontSize: 13,
     fontWeight: "700",
     color: colors.brandLight,
+    textAlign: "center",
   },
-  emailBox: { marginTop: spacing.md, gap: spacing.sm },
+  emailBox: { gap: spacing.sm },
   emailBtn: {
     marginTop: spacing.sm,
     backgroundColor: colors.brandLight,
@@ -175,13 +195,14 @@ const styles = StyleSheet.create({
   },
   emailBtnOff: { opacity: 0.6 },
   emailBtnText: { color: colors.white, fontWeight: "800", fontSize: 15 },
-  hint: {
+  legal: { marginTop: spacing.lg },
+  legalText: {
     textAlign: "center",
     fontSize: 12,
-    color: colors.slate400,
-    marginTop: spacing.md,
+    color: colors.slate500,
     lineHeight: 18,
   },
+  legalLink: { color: colors.brandLight, fontWeight: "700" },
   footer: {
     flexDirection: "row",
     justifyContent: "center",

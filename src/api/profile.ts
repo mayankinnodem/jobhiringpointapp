@@ -1,4 +1,4 @@
-import { api } from "./client";
+import { api, apiBaseUrl } from "./client";
 
 export type EducationEntry = {
   degree: string;
@@ -75,9 +75,5 @@ export async function uploadResume(uri: string, filename: string, mimeType: stri
 }
 
 export function webProfileUrl() {
-  const base =
-    process.env.EXPO_PUBLIC_API_URL ??
-    process.env.EXPO_PUBLIC_WEB_URL ??
-    "http://localhost:3000";
-  return `${base.replace(/\/$/, "")}/seeker/profile`;
+  return `${apiBaseUrl.replace(/\/$/, "")}/seeker/profile`;
 }

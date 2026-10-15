@@ -84,7 +84,7 @@ export default function RecruiterCompanyScreen() {
         <ScrollView contentContainerStyle={styles.scroll}>
           <View style={styles.info}>
             <Text style={styles.infoText}>
-              Set up your company before posting jobs. This appears on all your job listings.
+              Recruiter / employer page — shown on your job listings. This is separate from a job seeker’s personal profile (skills & resume).
             </Text>
           </View>
           <View style={styles.form}>

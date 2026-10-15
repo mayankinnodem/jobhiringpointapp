@@ -22,6 +22,14 @@ export async function fetchRegistrationSettings() {
   return data;
 }
 
+export async function checkAuthAvailability(payload: { email?: string; phone?: string }) {
+  const { data } = await api.post<{ ok: boolean; available: boolean }>(
+    "/api/auth/check-availability",
+    payload
+  );
+  return data;
+}
+
 export async function sendRegisterOtp(payload: {
   email: string;
   phone?: string;
@@ -60,14 +68,6 @@ export async function verifyOtp(payload: {
   });
   await setToken(data.token);
   return { user: data.user, roleCorrected: !!data.roleCorrected };
-}
-
-/** Email-only register when server skips OTP step */
-export async function verifyOtpSilent(payload: {
-  identifier: string;
-  purpose: "register";
-}) {
-  return verifyOtp({ ...payload, otp: "000000" });
 }
 
 export async function loginWithEmail(email: string, password: string) {
