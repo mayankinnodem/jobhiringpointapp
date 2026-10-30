@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { TabGradientHeader } from "@/components/TabGradientHeader";
 import { Screen } from "@/components/ui/Screen";
 import { colors, radius, spacing } from "@/theme";
+import { isPeerBlocked, loadBlockedPeers } from "@/lib/safety";
 
 function formatTime(iso: string) {
   const d = new Date(iso);
@@ -39,7 +40,8 @@ export default function MessagesScreen() {
   const load = useCallback(async () => {
     try {
       setError(null);
-      setThreads(await fetchChatThreads());
+      await loadBlockedPeers();
+      setThreads((await fetchChatThreads()).filter((thread) => !isPeerBlocked(thread.peerUserId)));
     } catch (e) {
       setError(getApiErrorMessage(e));
     } finally {

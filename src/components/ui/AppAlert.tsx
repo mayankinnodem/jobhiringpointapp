@@ -115,10 +115,13 @@ export function AppAlertProvider({ children }: { children: ReactNode }) {
   return (
     <AlertContext.Provider value={{ show }}>
       {children}
+      {config ? (
       <Modal
-        visible={!!config}
+        visible
         transparent
         animationType="fade"
+        presentationStyle="overFullScreen"
+        supportedOrientations={["portrait", "landscape"]}
         statusBarTranslucent
         onRequestClose={dismiss}
       >
@@ -214,6 +217,7 @@ export function AppAlertProvider({ children }: { children: ReactNode }) {
           </Pressable>
         </Pressable>
       </Modal>
+      ) : null}
     </AlertContext.Provider>
   );
 }

@@ -27,6 +27,7 @@ import { AppButton } from "@/components/ui/AppButton";
 import { JobCard } from "@/components/JobCard";
 import { StackPageShell } from "@/components/navigation/StackPageShell";
 import { useAuthStore } from "@/store/authStore";
+import { reportContent } from "@/lib/safety";
 import { colors, radius, shadow, spacing } from "@/theme";
 import type { JobListItem, RecruiterRef } from "@/types";
 
@@ -221,8 +222,41 @@ export default function JobDetailScreen() {
   const isSeeker = user?.role === "job_seeker";
   const isRecruiterOwner = user?.role === "recruiter" && recruiterIdFromJob(job) === user.id;
 
+  function reportListing() {
+    if (!user || !job) return;
+    appAlert("Report this job", "Tell our team if this listing is fake, abusive, or misleading.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Report",
+        style: "destructive",
+        onPress: () => {
+          void reportContent({
+            name: user.name,
+            email: user.email?.includes("@") ? user.email : `${user.id}@users.jobhiringpoint.com`,
+            category: "fraud",
+            description: `User ${user.id} reported job ${job._id} (${job.title}).`,
+          })
+            .then(() => appAlert("Reported", "Thanks. We will review this listing within 24 hours."))
+            .catch((e) => appAlert("Could not report", getApiErrorMessage(e)));
+        },
+      },
+    ]);
+  }
+
   return (
-    <StackPageShell title={job.title.length > 42 ? `${job.title.slice(0, 42)}…` : job.title}>
+    <StackPageShell
+      title={job.title.length > 42 ? `${job.title.slice(0, 42)}…` : job.title}
+      headerRight={
+        <Pressable
+          onPress={reportListing}
+          accessibilityRole="button"
+          accessibilityLabel="Report this job"
+          hitSlop={8}
+        >
+          <Ionicons name="flag-outline" size={22} color={colors.brand} />
+        </Pressable>
+      }
+    >
       <View style={styles.page}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <LinearGradient colors={[colors.brand, colors.brandDark]} style={styles.hero}>

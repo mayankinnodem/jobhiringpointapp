@@ -107,7 +107,7 @@ export default function RegisterScreen() {
       <Text style={styles.note}>
         {role === "job_seeker"
           ? "Free forever for job seekers — never pay to apply."
-          : "Free plan includes limited job posts. Upgrade anytime."}
+          : "Free plan includes a limited number of job posts."}
       </Text>
 
       <View style={styles.footer}>

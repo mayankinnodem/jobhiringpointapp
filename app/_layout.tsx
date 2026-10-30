@@ -1,6 +1,8 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
+import { StyleSheet } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   SafeAreaProvider,
   initialWindowMetrics,
@@ -26,7 +28,8 @@ export default function RootLayout() {
   }, [bootstrap]);
 
   return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+    <GestureHandlerRootView style={styles.root}>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics} style={styles.root}>
       <AppAlertProvider>
         {!bootstrapped ? (
           <>
@@ -57,5 +60,10 @@ export default function RootLayout() {
         )}
       </AppAlertProvider>
     </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+});

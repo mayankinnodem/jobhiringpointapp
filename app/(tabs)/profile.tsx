@@ -209,6 +209,12 @@ export default function ProfileScreen() {
             onPress={() => openSite("/help")}
           />
           <MenuRow
+            icon="flag-outline"
+            label="Community guidelines"
+            sub="Rules for jobs and messages"
+            onPress={() => openSite("/community-guidelines")}
+          />
+          <MenuRow
             icon="document-text-outline"
             label="Terms of Service"
             onPress={() => openSite("/terms")}

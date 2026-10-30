@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { appAlert } from "@/components/ui/AppAlert";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -29,6 +29,7 @@ import {
   sendChatViaSocket,
 } from "@/lib/chat-socket";
 import { useAuthStore } from "@/store/authStore";
+import { blockPeer, reportContent } from "@/lib/safety";
 import { colors, radius, spacing } from "@/theme";
 
 export default function ChatScreen() {
@@ -160,8 +161,52 @@ export default function ChatScreen() {
 
   const title = peerName ? decodeURIComponent(peerName) : "Chat";
 
+  function reportAndBlock() {
+    appAlert(
+      "Report this conversation",
+      "We review reports within 24 hours. This person will be blocked on your device.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Report and block",
+          style: "destructive",
+          onPress: () => void submitReport(),
+        },
+      ]
+    );
+  }
+
+  async function submitReport() {
+    if (!user || !peerUserId || !jobId) return;
+    try {
+      await reportContent({
+        name: user.name,
+        email: user.email?.includes("@") ? user.email : `${user.id}@users.jobhiringpoint.com`,
+        category: "harassment",
+        description: `User ${user.id} reported chat with ${peerUserId} about job ${jobId} and asked to block them.`,
+      });
+      await blockPeer(peerUserId);
+      router.back();
+      appAlert("Reported", "This person is blocked. Our team will review the conversation.");
+    } catch (e) {
+      appAlert("Could not report", getApiErrorMessage(e));
+    }
+  }
+
   return (
-    <StackPageShell title={title}>
+    <StackPageShell
+      title={title}
+      headerRight={
+        <Pressable
+          onPress={reportAndBlock}
+          accessibilityRole="button"
+          accessibilityLabel="Report or block"
+          hitSlop={8}
+        >
+          <Ionicons name="flag-outline" size={22} color={colors.brand} />
+        </Pressable>
+      }
+    >
         <KeyboardAvoidingView
           style={styles.flex}
           behavior={Platform.OS === "ios" ? "padding" : "height"}

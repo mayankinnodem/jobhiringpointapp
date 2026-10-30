@@ -19,9 +19,11 @@
     ],
     "ios": {
       "supportsTablet": true,
+      "requireFullScreen": true,
       "bundleIdentifier": "com.jobhiringpoint.app1",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIApplicationSupportsIndirectInputEvents": true
       },
       "icon": "./assets/icon.png",
       "splash": {
